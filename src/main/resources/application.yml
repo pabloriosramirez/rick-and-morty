@@ -1,0 +1,15 @@
+server:
+  port: 8030
+  servlet:
+    context-path: /rick-and-morty
+spring:
+  application:
+    name: rick-and-morty
+application:
+  services:
+    -
+      applicationName: Rick And Morty
+      applicationIdentifier: rick-and-morty
+      homePageUrl: https://rickandmortyapi.com
+      statusPageUrl: https://rickandmortyapi.com/actuator/info
+      healthPageUrl: https://rickandmortyapi.com/actuator/health

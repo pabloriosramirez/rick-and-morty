@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <int:gateway id="gateway" default-request-channel="characterChannel"
+                 service-interface="com.pabloriosramirez.api.rickandmorty.gateway.MainGateway"/>
+
+    <int:channel id="characterChannel"/>
+    <bean id="rick-and-morty_character_context"
+          class="com.pabloriosramirez.api.rickandmorty.domain.impl.ServiceContext">
+        <property name="configurationElementId" value="rick-and-morty_character"/>
+        <property name="servicePath" value="/api/character/{id}"/>
+        <property name="serviceCallMethod" value="GET"/>
+        <property name="applicationId" value="rick-and-morty"/>
+        <property name="serviceHeaders">
+            <map key-type="java.lang.String" value-type="java.lang.String">
+                <entry key="Content-Type" value="application/json"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="rick-and-morty_character_bean"
+          class="com.pabloriosramirez.api.rickandmorty.activator.impl.BasicRestServiceActivator">
+        <property name="serviceContext" ref="rick-and-morty_character_context"/>
+    </bean>
+
+    <int:service-activator id="rick-and-morty_character"
+                           input-channel="characterChannel"
+                           output-channel="locationChannel"
+                           ref="rick-and-morty_character_bean" method="invoke"/>
+
+    <int:channel id="locationChannel"/>
+
+    <bean id="rick-and-morty_location_context"
+          class="com.pabloriosramirez.api.rickandmorty.domain.impl.ServiceContext">
+        <property name="configurationElementId" value="rick-and-morty_location"/>
+        <property name="servicePath" value="/api/location/{id}"/>
+        <property name="serviceCallMethod" value="GET"/>
+        <property name="applicationId" value="rick-and-morty"/>
+        <property name="serviceHeaders">
+            <map key-type="java.lang.String" value-type="java.lang.String">
+                <entry key="Content-Type" value="application/json"/>
+            </map>
+        </property>
+    </bean>
+    <bean id="rick-and-morty_location_bean"
+          class="com.pabloriosramirez.api.rickandmorty.activator.impl.BasicRestServiceActivator">
+        <property name="serviceContext" ref="rick-and-morty_location_context"/>
+    </bean>
+
+    <int:service-activator id="rick-and-morty_location"
+                           input-channel="locationChannel"
+                           output-channel="transformerChannel"
+                           ref="rick-and-morty_location_bean" method="invoke"/>
+
+    <int:channel id="transformerChannel"/>
+
+
+    <int:transformer input-channel="transformerChannel" ref="mainTransformer"></int:transformer>
+
+</beans>
